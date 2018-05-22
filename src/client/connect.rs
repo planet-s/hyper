@@ -388,12 +388,16 @@ mod http {
     use std::sync::Arc;
     use std::time::{Duration, Instant};
 
+    #[cfg(not(target_os = "redox"))]
+    use net2::TcpBuilder;
+    #[cfg(target_os = "redox")]
+    use std::net;
+
     use futures::{Async, Poll};
     use futures::future::{Executor, ExecuteError};
     use futures::sync::oneshot;
     use futures_cpupool::{Builder as CpuPoolBuilder};
     use http::uri::Scheme;
-    use net2::TcpBuilder;
     use tokio_reactor::Handle;
     use tokio_tcp::{TcpStream, ConnectFuture};
     use tokio_timer::Delay;
@@ -403,6 +407,7 @@ mod http {
     use self::http_connector::HttpConnectorBlockingTask;
 
 
+    #[cfg(not(target_os = "redox"))]
     fn connect(addr: &SocketAddr, local_addr: &Option<IpAddr>, handle: &Option<Handle>, reuse_address: bool) -> io::Result<ConnectFuture> {
         let builder = match addr {
             &SocketAddr::V4(_) => TcpBuilder::new_v4()?,
@@ -436,6 +441,15 @@ mod http {
         };
 
         Ok(TcpStream::connect_std(builder.to_tcp_stream()?, addr, &handle))
+    }
+    #[cfg(target_os = "redox")]
+    fn connect(addr: &SocketAddr, local_addr: &Option<IpAddr>, handle: &Option<Handle>, _reuse_address: bool) -> io::Result<ConnectFuture> {
+        let handle = match *handle {
+            Some(ref handle) => Cow::Borrowed(handle),
+            None => Cow::Owned(Handle::current()),
+        };
+
+        Ok(TcpStream::connect_std(net::TcpStream::connect(addr)?, &addr, &handle))
     }
 
     /// A connector for the `http` scheme.
@@ -689,11 +703,15 @@ mod http {
                     State::Connecting(ref mut c) => {
                         let sock = try_ready!(c.poll(&self.handle));
 
-                        if let Some(dur) = self.keep_alive_timeout {
-                            sock.set_keepalive(Some(dur))?;
+                        if let Some(_dur) = self.keep_alive_timeout {
+                            #[cfg(not(target_os = "redox"))]
+                            sock.set_keepalive(Some(_dur))?;
                         }
 
+                        #[cfg(not(target_os = "redox"))]
                         sock.set_nodelay(self.nodelay)?;
+                        #[cfg(target_os = "redox")]
+                        let _ = self.nodelay; // bypass unused warnings
 
                         return Ok(Async::Ready((sock, Connected::new())));
                     },

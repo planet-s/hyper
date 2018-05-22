@@ -105,13 +105,17 @@ impl Stream for AddrIncoming {
         loop {
             match self.listener.poll_accept() {
                 Ok(Async::Ready((socket, addr))) => {
-                    if let Some(dur) = self.tcp_keepalive_timeout {
-                        if let Err(e) = socket.set_keepalive(Some(dur)) {
-                            trace!("error trying to set TCP keepalive: {}", e);
+                    if let Some(_dur) = self.tcp_keepalive_timeout {
+                        #[cfg(not(target_os = "redox"))] {
+                            if let Err(e) = socket.set_keepalive(Some(_dur)) {
+                                trace!("error trying to set TCP keepalive: {}", e);
+                            }
                         }
                     }
-                    if let Err(e) = socket.set_nodelay(self.tcp_nodelay) {
-                        trace!("error trying to set TCP nodelay: {}", e);
+                    #[cfg(not(target_os = "redox"))] {
+                        if let Err(e) = socket.set_nodelay(self.tcp_nodelay) {
+                            trace!("error trying to set TCP nodelay: {}", e);
+                        }
                     }
                     return Ok(Async::Ready(Some(AddrStream::new(socket, addr))));
                 },
