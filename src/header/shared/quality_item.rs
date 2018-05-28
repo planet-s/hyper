@@ -1,5 +1,3 @@
-#[allow(unused)]
-use std::ascii::AsciiExt;
 use std::cmp;
 use std::default::Default;
 use std::fmt;

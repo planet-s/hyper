@@ -1,7 +1,5 @@
 use std::fmt::{self, Display};
 use std::str::FromStr;
-#[allow(unused)]
-use std::ascii::AsciiExt;
 
 use self::Charset::*;
 

@@ -93,7 +93,7 @@ impl<V: ?Sized + Any + 'static> PtrMapCell<V> {
 
     #[inline]
     pub fn into_value(self, key: TypeId) -> Option<Box<V>> {
-        let map = unsafe { self.0.into_inner() };
+        let map = self.0.into_inner();
         match map {
             PtrMap::Empty => None,
             PtrMap::One(id, v) => if id == key {
