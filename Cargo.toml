@@ -31,10 +31,10 @@ mime = "0.3.2"
 percent-encoding = "1.0"
 relay = "0.1"
 time = "0.1"
-tokio-core = { git = "https://github.com/redox-os/tokio-core" }
-tokio-proto = { git = "https://github.com/redox-os/tokio-proto" }
+tokio-core = { git = "https://gitlab.redox-os.org/redox-os/tokio-core" }
+tokio-proto = { git = "https://gitlab.redox-os.org/redox-os/tokio-proto" }
 tokio-service = "0.1"
-tokio-io = { git = "https://github.com/redox-os/tokio" }
+tokio-io = { git = "https://gitlab.redox-os.org/redox-os/tokio" }
 unicase = "2.0"
 
 [dev-dependencies]
