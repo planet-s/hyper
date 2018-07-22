@@ -443,7 +443,7 @@ mod http {
         Ok(TcpStream::connect_std(builder.to_tcp_stream()?, addr, &handle))
     }
     #[cfg(target_os = "redox")]
-    fn connect(addr: &SocketAddr, local_addr: &Option<IpAddr>, handle: &Option<Handle>, _reuse_address: bool) -> io::Result<ConnectFuture> {
+    fn connect(addr: &SocketAddr, _local_addr: &Option<IpAddr>, handle: &Option<Handle>, _reuse_address: bool) -> io::Result<ConnectFuture> {
         let handle = match *handle {
             Some(ref handle) => Cow::Borrowed(handle),
             None => Cow::Owned(Handle::current()),
